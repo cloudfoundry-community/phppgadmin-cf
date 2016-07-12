@@ -437,30 +437,41 @@
 		$processes = $data->getProcesses($_REQUEST['database']);
 
 		$columns = array(
+			'waiting' => array(
+				'title' => $lang['strquerywaiting'],
+				'field' => field('waiting'),
+				'type'  => 'yesno',
+			),
+			'client' => array(
+				'title' => 'Client',
+				'field' => field('client_addr'),
+			),
 			'user' => array(
 				'title' => $lang['strusername'],
 				'field' => field('usename'),
 			),
 			'process' => array(
 				'title' => $lang['strprocess'],
-				'field' => field('pid'),
+				'field' => field('procpid'),
 			),
             'blocked' => array(
                 'title' => $lang['strblocked'],
                 'field' => field('waiting'),
             ),
+			'started_ago' => array(
+				'title' => $lang['strstarttime'],
+				'field' => field('started_ago'),
+			),
+
+			// Build possible actions for our process list
+			'actions'   => array('title' => $lang['stractions']),
+
+			// SQL Query. It's length varies widely, so it should be placed after actions
 			'query' => array(
 				'title' => $lang['strsql'],
 				'field' => field('query'),
 			),
-			'start_time' => array(
-				'title' => $lang['strstarttime'],
-				'field' => field('query_start'),
-			),
 		);
-
-		// Build possible actions for our process list
-		$columns['actions'] = array('title' => $lang['stractions']);
 
 		$actions = array();
 		if ($data->hasUserSignals() || $data->isSuperUser()) {

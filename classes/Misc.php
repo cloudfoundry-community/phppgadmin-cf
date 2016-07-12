@@ -12,7 +12,7 @@
 		var $form;
 
 		/* Constructor */
-		function Misc() {
+		function __construct() {
 		}
 
 		/**
@@ -331,7 +331,7 @@
 					$out = $params['function']($str, $params);
 					break;
 				case 'prettysize':
-					if ($str == -1) 
+					if ($str == -1)
 						$out = $lang['strnoaccess'];
 					else
 					{
@@ -579,7 +579,7 @@
 			if ($doBody) {
 				if (isset($_reload_browser)) $this->printReload(false);
 				elseif (isset($_reload_drop_database)) $this->printReload(true);
-				if (!isset($_no_bottom_link)) 
+				if (!isset($_no_bottom_link))
 					echo "<a href=\"#\" class=\"bottom_link\">".$lang['strgotoppage']."</a>";
 
 				echo "</body>\n";
@@ -1008,6 +1008,17 @@
 
 				case 'table':
 					$tabs = array (
+						'browse' => array(
+							'title' => $lang['strbrowse'],
+							'url'   => 'display.php',
+							'urlvars' => array (
+									'subject' => 'table',
+									'table' => field('table')
+							),
+							'icon'=>'Columns',
+							'branch'=> true,
+							
+						),
 						'columns' => array (
 							'title' => $lang['strcolumns'],
 							'url'   => 'tblproperties.php',
@@ -1509,7 +1520,7 @@
 				else
 					echo $crumblink;
 
-				echo "{$lang['strseparator']}";
+				echo "<span class=\"separator\" unselectable=\"on\">{$lang['strseparator']}</span>";
 				echo "</td>";
 			}
 
@@ -1759,7 +1770,7 @@
 			if ($help) {
 				echo "<a class=\"help\" href=\"";
 				echo htmlspecialchars("help.php?help=".urlencode($help)."&server=".urlencode($_REQUEST['server']));
-				echo "\" title=\"{$lang['strhelp']}\" target=\"phppgadminhelp\">{$lang['strhelpicon']}</a>";
+				echo "\" title=\"{$lang['strhelp']}\" target=\"phppgadminhelp\" unselectable=\"on\">{$lang['strhelpicon']}</a>";
 			}
 		}
 
@@ -1844,7 +1855,7 @@
 				$subject = value($urlvars['subject'], $fields);
 			else
 				$subject = '';
-			
+
 			if (isset($_REQUEST['server']) and !isset($urlvars['server']) and $subject != 'root') {
 				$urlvars['server'] = $_REQUEST['server'];
 				if (isset($_REQUEST['database']) and !isset($urlvars['database']) and $subject != 'server') {
@@ -1968,7 +1979,7 @@
 				echo "<table>\n";
 				echo "<tr>\n";
 
-                // Handle cases where no class has been passed 
+                // Handle cases where no class has been passed
                 if (isset($column['class'])) {
 			        $class = $column['class'] !== '' ? " class=\"{$column['class']}\"":'';
                 } else {
@@ -2326,7 +2337,7 @@
 
 			return $grps;
 		}
-		
+
 
 		/**
 		 * Get list of servers
@@ -2337,7 +2348,12 @@
 		function getServers($recordset = false, $group = false) {
 			global $conf;
 
+			if ( isset( $conf['autologin'] ) && $conf['autologin']) {
+				$logins = array();
+			}
+			else {
 			$logins = isset($_SESSION['webdbLogin']) && is_array($_SESSION['webdbLogin']) ? $_SESSION['webdbLogin'] : array();
+			}
 			$srvs = array();
 
 			if (($group !== false) and ($group !== 'all'))
@@ -2346,15 +2362,16 @@
 						$conf['srv_groups'][$group]['servers'])), 1);
 				else
 					$group = '';
-			
+
 			foreach($conf['servers'] as $idx => $info) {
-				$server_id = $info['host'].':'.$info['port'].':'.$info['sslmode'];
-				if (($group === false) 
+				
+
+				if (($group === false)
 					or (isset($group[$idx]))
 					or ($group === 'all')
 				) {
-					$server_id = $info['host'].':'.$info['port'].':'.$info['sslmode'];
-					
+					$server_id = $info['host'].':'.$info['port'].':'.$info['sslmode'].':'.$info['defaultdb'].':'. ( isset($info['username']) ? $info['username'] : "" );
+
 					if (isset($logins[$server_id])) $srvs[$server_id] = $logins[$server_id];
 					else $srvs[$server_id] = $info;
 
@@ -2407,13 +2424,23 @@
 			if ($server_id === null && isset($_REQUEST['server']))
 				$server_id = $_REQUEST['server'];
 
-			// Check for the server in the logged-in list
-			if (isset($_SESSION['webdbLogin'][$server_id]))
-				return $_SESSION['webdbLogin'][$server_id];
+			if ( !isset( $conf['autologin'] ) || !$conf['autologin']) {
+				// Check for the server in the logged-in list
+				if (isset($_SESSION['webdbLogin'][$server_id])){
+					return $_SESSION['webdbLogin'][$server_id];
+				}
+			}
 
 			// Otherwise, look for it in the conf file
 			foreach($conf['servers'] as $idx => $info) {
-				if ($server_id == $info['host'].':'.$info['port'].':'.$info['sslmode']) {
+				$test_id = implode(array(
+					isset($info['host']) ? $info['host'] : "",
+					isset($info['port']) ? $info['port'] : "",
+					isset($info['sslmode']) ? $info['sslmode'] : "",
+					isset($info['defaultdb']) ? $info['defaultdb'] : "",
+					isset($info['username']) ? $info['username'] : "",
+				), ":" );
+				if ($server_id ==$test_id) {
 					// Automatically use shared credentials if available
 					if (!isset($info['username']) && isset($_SESSION['sharedUsername'])) {
 						$info['username'] = $_SESSION['sharedUsername'];
@@ -2425,7 +2452,6 @@
 					return $info;
 				}
 			}
-
 			if ($server_id === null){
 				return null;
 			} else {
@@ -2460,7 +2486,7 @@
 					$_SESSION['webdbLogin'][$server_id][$key] = $value;
 			}
 		}
-		
+
 		/**
 		 * Set the current schema
 		 * @param $schema The schema name
@@ -2469,7 +2495,7 @@
 		 */
 		function setCurrentSchema($schema) {
 			global $data;
-			
+
 			$status = $data->setSchema($schema);
 			if($status != 0)
 				return $status;
@@ -2480,7 +2506,7 @@
 		}
 
 		/**
-		 * Save the given SQL script in the history 
+		 * Save the given SQL script in the history
 		 * of the database and server.
 		 * @param $script the SQL script to save.
 		 */
@@ -2493,12 +2519,12 @@
 				'queryid' => $time,
 			);
 		}
-	
+
 		/*
-		 * Output dropdown list to select server and 
+		 * Output dropdown list to select server and
 		 * databases form the popups windows.
 		 * @param $onchange Javascript action to take when selections change.
-		 */	
+		 */
 		function printConnection($onchange) {
 			global $data, $lang, $misc;
 
@@ -2507,7 +2533,7 @@
 			$misc->printHelp($lang['strserver'], 'pg.server');
 			echo "</label>";
 			echo ": <select name=\"server\" {$onchange}>\n";
-			
+
 			$servers = $misc->getServers();
 			foreach($servers as $info) {
 				if (empty($info['username'])) continue; // not logged on this server
@@ -2516,7 +2542,7 @@
 					htmlspecialchars("{$info['desc']} ({$info['id']})"), "</option>\n";
 			}
 			echo "</select>\n</td><td style=\"text-align: right\">\n";
-			
+
 			// Get the list of all databases
 			$databases = $data->getDatabases();
 
@@ -2525,11 +2551,11 @@
 				echo "<label>";
 				$misc->printHelp($lang['strdatabase'], 'pg.database');
 				echo ": <select name=\"database\" {$onchange}>\n";
-				
+
 				//if no database was selected, user should select one
 				if (!isset($_REQUEST['database']))
 					echo "<option value=\"\">--</option>\n";
-				
+
 				while (!$databases->EOF) {
 					$dbname = $databases->fields['datname'];
 					echo "<option value=\"", htmlspecialchars($dbname), "\"",
@@ -2541,10 +2567,10 @@
 			}
 			else {
 				$server_info = $misc->getServerInfo();
-				echo "<input type=\"hidden\" name=\"database\" value=\"", 
+				echo "<input type=\"hidden\" name=\"database\" value=\"",
 					htmlspecialchars($server_info['defaultdb']), "\" />\n";
 			}
-			
+
 			echo "</td></tr></table>\n";
 		}
 

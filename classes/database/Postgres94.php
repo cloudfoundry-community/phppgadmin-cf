@@ -1,15 +1,15 @@
 <?php
 
 /**
- * PostgreSQL 9.3 support
+ * PostgreSQL 9.4 support
  *
  */
 
-include_once('./classes/database/Postgres94.php');
+include_once('./classes/database/Postgres.php');
 
-class Postgres93 extends Postgres94 {
+class Postgres94 extends Postgres {
 
-	var $major_version = 9.3;
+	var $major_version = 9.4;
 
 	/**
 	 * Constructor
@@ -22,9 +22,8 @@ class Postgres93 extends Postgres94 {
 	// Help functions
 
 	function getHelpPages() {
-		include_once('./help/PostgresDoc93.php');
+		include_once('./help/PostgresDoc94.php');
 		return $this->help_page;
 	}
 
 }
-?>

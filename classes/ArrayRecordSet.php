@@ -12,17 +12,17 @@ class ArrayRecordSet {
 	var $EOF = false;
 	var $fields;
 	
-	function ArrayRecordSet($data) {
+	function __construct($data) {
 		$this->_array = $data;
 		$this->_count = count($this->_array);
 		$this->fields = reset($this->_array);
 		if ($this->fields === false) $this->EOF = true;
 	}
-	
+
 	function recordCount() {
 		return $this->_count;
 	}
-	
+
 	function moveNext() {
 		$this->fields = next($this->_array);
 		if ($this->fields === false) $this->EOF = true;

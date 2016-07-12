@@ -149,7 +149,7 @@
 	$lang['strgotoppage'] = 'вверх';
 	$lang['strtheme'] = 'Тема';
 	$lang['strcluster'] = 'Кластер';
-	
+	$lang['strquerywaiting'] = 'Ждёт';	
 	// Admin
 	$lang['stradminondatabase'] = 'Следующие административные задачи применяются ко всей базе данных %s.';
 	$lang['stradminontable'] = 'Следующие административные задачи применяются к таблице %s.';

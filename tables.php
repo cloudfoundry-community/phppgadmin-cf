@@ -25,7 +25,7 @@
 		}
 
 		if (!isset($_REQUEST['name'])) $_REQUEST['name'] = '';
-		if (!isset($_REQUEST['fields'])) $_REQUEST['fields'] = '';
+		if (!isset($_REQUEST['fields'])) $_REQUEST['fields'] = '10';
 		if (!isset($_REQUEST['tblcomment'])) $_REQUEST['tblcomment'] = '';
 		if (!isset($_REQUEST['spcname'])) $_REQUEST['spcname'] = '';
 
@@ -172,14 +172,14 @@
 				echo "<p><input type=\"hidden\" name=\"action\" value=\"create\" />\n";
 				echo "<input type=\"hidden\" name=\"stage\" value=\"3\" />\n";
 				echo $misc->form;
-				echo "<input type=\"hidden\" name=\"name\" value=\"", htmlspecialchars($_REQUEST['name']), "\" />\n";
+				echo "<input type=\"\" name=\"name\" value=\"", htmlspecialchars($_REQUEST['name']), "\" />\n";
 				echo "<input type=\"hidden\" name=\"fields\" value=\"", htmlspecialchars($_REQUEST['fields']), "\" />\n";
 				if (isset($_REQUEST['withoutoids'])) {
 					echo "<input type=\"hidden\" name=\"withoutoids\" value=\"true\" />\n";
 				}
-				echo "<input type=\"hidden\" name=\"tblcomment\" value=\"", htmlspecialchars($_REQUEST['tblcomment']), "\" />\n";
+				echo "<input type=\"\" name=\"tblcomment\" value=\"", htmlspecialchars($_REQUEST['tblcomment']), "\" />\n";
 				if (isset($_REQUEST['spcname'])) {
-					echo "<input type=\"hidden\" name=\"spcname\" value=\"", htmlspecialchars($_REQUEST['spcname']), "\" />\n";
+					echo "<input type=\"\" name=\"spcname\" value=\"", htmlspecialchars($_REQUEST['spcname']), "\" />\n";
 				}
 				echo "<input type=\"submit\" value=\"{$lang['strcreate']}\" />\n";
 				echo "<input type=\"submit\" name=\"cancel\" value=\"{$lang['strcancel']}\" /></p>\n";
@@ -350,6 +350,7 @@
 		if ($confirm) {
 			$misc->printTrail('table');
 			$misc->printTabs('table','select');
+// 			$misc->printTitle($lang['strselect'], 'pg.sql.select');
 			$misc->printMsg($msg);
 
 			$attrs = $data->getTableAttributes($_REQUEST['table']);
@@ -457,6 +458,7 @@
 		if ($confirm) {
 			$misc->printTrail('table');
 			$misc->printTabs('table','insert');
+// 			$misc->printTitle($lang['strinsertrow'], 'pg.sql.insert');
 			
 			$misc->printMsg($msg);
 
